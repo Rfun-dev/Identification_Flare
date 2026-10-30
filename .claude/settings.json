@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell($env:PYTHONWARNINGS=\"default\"; Measure-Command { python train.py --image_dir data_dummy/Lat60_Lon60_Nans0_png_224 --index_csv data_dummy/index.csv --run_dir runs/dummy --epochs 3 --num_workers 2 --train_stride_h 2 | Out-Host } | Select-Object TotalSeconds)",
+      "PowerShell(python evaluate.py --run_dir runs/dummy --num_workers 0 2>$null)",
+      "PowerShell(python predict.py --run_dir runs/dummy --ar 9011 --time \"2015-01-31 12:00\" --saliency 2>$null)",
+      "PowerShell(python predict.py --run_dir runs/dummy --ar 9001 --time \"2015-01-01 20:00\" 2>$null)",
+      "PowerShell(nvidia-smi)",
+      "PowerShell(Get-Command python -All)",
+      "PowerShell(py -0p 2>$null)",
+      "PowerShell(& .\\\\.venv\\\\Scripts\\\\python.exe --version)",
+      "PowerShell(& .\\\\.venv\\\\Scripts\\\\python.exe -m pip list 2>$null)",
+      "PowerShell(& .\\\\.venv\\\\Scripts\\\\python.exe gpu_running.py)",
+      "PowerShell(foreach \\($cu in \"cu126\",\"cu128\",\"cu130\"\\) { \"== $cu\"; & .\\\\.venv\\\\Scripts\\\\python.exe -m pip index versions torch --index-url \"https://download.pytorch.org/whl/$cu\" 2>$null | Select-Object -First 2 })",
+      "PowerShell(& .\\\\.venv\\\\Scripts\\\\python.exe -m pip check)",
+      "PowerShell(& .\\\\.venv\\\\Scripts\\\\python.exe -m pip uninstall -y torchaudio)",
+      "PowerShell(& .\\\\.venv\\\\Scripts\\\\python.exe -m pip install \"torch==2.14.1+cu126\" \"torchvision==0.29.1+cu126\" --index-url https://download.pytorch.org/whl/cu126 --extra-index-url https://pypi.org/simple --progress-bar off)",
+      "PowerShell($p = Get-CimInstance Win32_Process -Filter \"Name='python.exe'\" | Where-Object { $_.CommandLine -match 'pip install' }; if \\($p\\) { $p | ForEach-Object { \"waiting PID $\\($_.ProcessId\\)\" }; Wait-Process -Id $p.ProcessId -Timeout 580 -ErrorAction SilentlyContinue; \"done waiting\" } else { \"no pip process running\" })",
+      "PowerShell($py = \".\\\\.venv\\\\Scripts\\\\python.exe\"; & $py -c \"import pandas, numpy, sklearn, PIL, matplotlib; print\\('pandas', pandas.__version__, 'numpy', numpy.__version__\\)\"; & $py prepare_data.py --data_dir data_dummy --image_dir data_dummy/Lat60_Lon60_Nans0_png_224 --index_csv data_dummy/index.csv; & $py evaluate.py --run_dir runs/dummy --num_workers 0 2>$null; & $py predict.py --run_dir runs/dummy --ar 9011 --time \"2015-01-31 12:00\" 2>$null)",
+      "PowerShell(Wait-Process -Name curl -Timeout 580 -ErrorAction SilentlyContinue)",
+      "PowerShell($env:TQDM_DISABLE = \"1\"; $py = \".\\\\.venv\\\\Scripts\\\\python.exe\"; $t = Measure-Command { & $py train.py --image_dir data_dummy/Lat60_Lon60_Nans0_png_224 --index_csv data_dummy/index.csv --run_dir runs/dummy_gpu --epochs 6 --num_workers 2 --train_stride_h 2 --eval_stride_h 1 2>&1 | Out-Host }; \"Total: {0:N0} detik\" -f $t.TotalSeconds)",
+      "PowerShell(powershell -ExecutionPolicy Bypass -File setup_env.ps1 2>&1 | Select-String -Pattern \"ERROR|error|Successfully|already satisfied: torch|Versi|CUDA|GPU|Memori\")",
+      "PowerShell(Wait-Process -Name curl -Timeout 590 -ErrorAction SilentlyContinue)",
+      "PowerShell($s = \"C:\\\\Users\\\\R.fun\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\d--kuliah-semester-7-projek-project-2\\\\6cc02ad1-58d3-47af-af26-8816f3521262\\\\scratchpad\"; Remove-Item -Recurse -Force \"$s\\\\dl_test\", \"$s\\\\dl_test2\", \"$s\\\\ref_80mb.bin\", \"$s\\\\run1.txt\", \"$s\\\\run1_err.txt\" -Confirm:$false -ErrorAction SilentlyContinue; & .\\\\.venv\\\\Scripts\\\\python.exe download_data.py --help | Select-Object -First 3)",
+      "PowerShell($part = Get-Partition -DriveLetter D; Get-PhysicalDisk | Where-Object { $_.DeviceId -eq \\(Get-Disk -Number $part.DiskNumber\\).Number } | Select-Object FriendlyName, MediaType, BusType | Format-List)",
+      "PowerShell($d = \"data_dummy\\\\Lat60_Lon60_Nans0_png_224\\\\9011\"; $f = \"20150131_082400\",\"20150131_094800\",\"20150131_111200\",\"20150131_123600\" | ForEach-Object { \"$d\\\\9011_hmi.M_720s.${_}_TAI.1.magnetogram_224.png\" }; $f | ForEach-Object { Test-Path $_ }; .\\\\.venv\\\\Scripts\\\\python.exe predict.py --run_dir runs/dummy_gpu --images $f 2>&1 | Select-String -NotMatch \"Warning\")",
+      "PowerShell(Get-ChildItem runs -Recurse -File | Select-Object @{n='File';e={$_.FullName.Replace\\(\\(Get-Location\\).Path+'\\\\',''\\)}}, @{n='MB';e={[math]::Round\\($_.Length/1MB,2\\)}}, LastWriteTime | Format-Table -AutoSize | Out-String -Width 200; Get-ChildItem data -File -ErrorAction SilentlyContinue | Select-Object Name, @{n='MB';e={[math]::Round\\($_.Length/1MB,1\\)}} | Format-Table -AutoSize)",
+      "PowerShell(Import-Csv runs\\\\flareformer\\\\history.csv | Format-Table epoch, @{n='loss';e={[double]$_.train_loss};f='N4'}, @{n='TSS';e={[double]$_.val_TSS};f='N3'}, @{n='HSS';e={[double]$_.val_HSS};f='N3'}, @{n='AUC';e={[double]$_.val_AUC};f='N3'}, @{n='recall';e={[double]$_.val_recall};f='N3'}, @{n='prec';e={[double]$_.val_precision};f='N3'}, @{n='thr';e={[double]$_.threshold};f='N2'} -AutoSize; Get-Content runs\\\\flareformer\\\\config.json | Select-String \"flare_class|n_frames|epochs|batch_size|amp|neg_ratio|patience|train_stride|eval_stride\"; $c = torch = $null; .\\\\.venv\\\\Scripts\\\\python.exe -c \"import torch; c=torch.load\\(r'runs/flareformer/best.pt', map_location='cpu', weights_only=True\\); print\\('best epoch', c['epoch'], 'thr', round\\(c['threshold'],3\\)\\); print\\({k:\\(round\\(v,3\\) if isinstance\\(v,float\\) else v\\) for k,v in c['val'].items\\(\\)}\\)\")",
+      "PowerShell($env:TQDM_DISABLE = \"1\"; $t = Measure-Command { .\\\\.venv\\\\Scripts\\\\python.exe evaluate.py --run_dir runs/flareformer 2>&1 | Select-String -NotMatch \"Warning\" | Out-Host }; \"Waktu: {0:N0} detik\" -f $t.TotalSeconds)"
+    ]
+  }
+}

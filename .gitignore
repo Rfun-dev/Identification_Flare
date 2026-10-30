@@ -1,0 +1,8 @@
+.venv/
+data/
+data_dummy/
+data_realtime*/
+data_recent*/
+runs/
+__pycache__/
+*.tar.gz
